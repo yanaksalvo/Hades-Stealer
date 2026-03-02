@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameLauncher Deployment Engine</title>
+    <style>
+        :root {
+            --bg-main: #0B0C10;
+            --bg-sidebar: #14181F;
+            --bg-card: #161B22;
+            --bg-input: #111418;
+            --border-color: #1F2833;
+            --accent-primary: #66FCF1;
+            --accent-secondary: #45A29E;
+            --text-light: #C5C6C7;
+            --text-white: #FFFFFF;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            background-color: #000;
+            color: var(--text-white);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* Window Container */
+        .window {
+            position: absolute;
+            background-color: var(--bg-main);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9);
+            display: flex;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        #main-app {
+            width: 1100px;
+            height: 750px;
+            z-index: 10;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .brand {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--accent-primary);
+            text-align: center;
+            padding: 60px 0;
+            letter-spacing: 1px;
+        }
+
+        .nav-item {
+            height: 55px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-item .indicator {
+            width: 5px;
+            height: 100%;
+            background-color: transparent;
+        }
+
+        .nav-item.active .indicator {
+            background-color: var(--accent-primary);
+        }
+
+        .nav-item span {
+            margin-left: 25px;
+            font-weight: bold;
+            font-size: 14px;
+            color: var(--accent-secondary);
+        }
+
+        .nav-item.active span {
+            color: var(--accent-primary);
+        }
+
+        /* Content Area */
+        .content {
+            flex-grow: 1;
+            padding: 50px 60px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .header-tools {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+
+        select.lang-select {
+            background-color: var(--bg-card);
+            color: var(--accent-primary);
+            border: 1px solid var(--accent-primary);
+            padding: 5px 15px;
+            font-weight: bold;
+            cursor: pointer;
+            outline: none;
+        }
+
+        /* Views */
+        .view {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .view.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .view-title {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--text-white);
+        }
+
+        .view-subtitle {
+            font-size: 16px;
+            color: var(--accent-primary);
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .tech-report {
+            color: var(--text-light);
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            font-family: 'Consolas', monospace;
+        }
+
+        /* UI Elements */
+        .btn {
+            background-color: var(--border-color);
+            color: var(--accent-primary);
+            border: 1px solid var(--accent-primary);
+            padding: 16px 50px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            align-self: flex-end;
+            margin-top: auto;
+            transition: 0.3s;
+        }
+
+        .btn:hover {
+            background-color: var(--accent-primary);
+            color: var(--bg-main);
+        }
+
+        .input-group {
+            display: flex;
+            margin-top: 10px;
+            gap: 10px;
+        }
+
+        .label {
+            color: var(--accent-primary);
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .text-input {
+            flex: 1;
+            background-color: var(--bg-main);
+            color: white;
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            font-family: 'Consolas', monospace;
+            outline: none;
+        }
+
+        .browse-btn {
+            background-color: var(--border-color);
+            color: var(--accent-primary);
+            border: none;
+            padding: 0 25px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .legal-box {
+            background-color: var(--bg-input);
+            color: var(--text-light);
+            border: 1px solid var(--border-color);
+            font-family: 'Consolas', monospace;
+            font-size: 13px;
+            padding: 20px;
+            height: 280px;
+            overflow-y: scroll;
+            margin-bottom: 20px;
+            line-height: 1.8;
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            color: var(--accent-primary);
+            font-weight: bold;
+        }
+
+        .checkbox-row input {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent-primary);
+        }
+
+        /* Installer Modal */
+        #installer {
+            width: 650px;
+            height: 450px;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            z-index: 1000;
+        }
+
+        .inst-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: var(--accent-primary);
+            margin-bottom: 10px;
+        }
+
+        .inst-target {
+            font-family: 'Consolas', monospace;
+            font-size: 11px;
+            color: var(--accent-secondary);
+            margin-bottom: 30px;
+        }
+
+        .inst-status {
+            font-family: 'Consolas', monospace;
+            font-size: 14px;
+            color: var(--text-light);
+            margin-bottom: 20px;
+        }
+
+        .p-bg {
+            width: 500px;
+            height: 2px;
+            background-color: var(--border-color);
+            margin-bottom: 15px;
+        }
+
+        .p-bar {
+            height: 100%;
+            background-color: var(--accent-primary);
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        .inst-perc {
+            font-family: 'Consolas', monospace;
+            font-size: 14px;
+            color: var(--accent-secondary);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="main-app" class="window">
+        <div class="sidebar">
+            <div class="brand">GameLauncher</div>
+            <div id="nav-WELCOME" class="nav-item active" onclick="navigate('WELCOME')">
+                <div class="indicator"></div><span id="txt-home">HOME</span>
+            </div>
+            <div id="nav-CONFIG" class="nav-item" onclick="navigate('CONFIG')">
+                <div class="indicator"></div><span id="txt-conf">CONFIG</span>
+            </div>
+            <div id="nav-LEGAL" class="nav-item" onclick="navigate('LEGAL')">
+                <div class="indicator"></div><span id="txt-leg">PROTOCOL</span>
+            </div>
+            <div id="nav-SUPPORT" class="nav-item" onclick="navigate('SUPPORT')">
+                <div class="indicator"></div><span id="txt-supp">SUPPORT</span>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="header-tools">
+                <select id="lang-select" class="lang-select" onchange="changeLang(this.value)">
+                    <option value="EN">EN</option>
+                    <option value="PT">PT</option>
+                    <option value="DE">DE</option>
+                    <option value="FR">FR</option>
+                    <option value="ES">ES</option>
+                </select>
+            </div>
+
+            <div id="view-welcome" class="view active">
+                <div id="w_t" class="view-title">GAMELAUNCHER Setup</div>
+                <div id="w_d" class="view-subtitle">High-Performance Engine Deployment Utility</div>
+                <div class="card">
+                    <div id="w_c" class="tech-report"></div>
+                </div>
+                <button class="btn" onclick="navigate('CONFIG')" id="btn-next1">NEXT</button>
+            </div>
+
+            <div id="view-config" class="view">
+                <div id="conf-t" class="view-title">CONFIG</div>
+                <div id="conf-st" class="view-subtitle">Installation Parameters</div>
+                <div class="card">
+                    <span id="path_t" class="label">INSTALLATION PATH</span>
+                    <div class="input-group">
+                        <input type="text" id="install-path-input" class="text-input" readonly
+                            value="C:/Program Files/GameLauncher">
+                        <button class="browse-btn" onclick="browsePath()" id="txt-browse">BROWSE</button>
+                    </div>
+                </div>
+                <button class="btn" onclick="navigate('LEGAL')" id="btn-next2">NEXT</button>
+            </div>
+
+            <div id="view-legal" class="view">
+                <div id="leg-t" class="view-title">PROTOCOL</div>
+                <div id="leg-st" class="view-subtitle">Legal & Integrity Clauses</div>
+                <div id="legal-content" class="legal-box"></div>
+                <div class="checkbox-row">
+                    <input type="checkbox" id="agree-cb">
+                    <label for="agree-cb" id="agree-label">I accept all 26 legal protocols.</label>
+                </div>
+                <button class="btn" onclick="startFinal()" id="btn-inst">INITIALIZE</button>
+            </div>
+
+            <div id="view-support" class="view">
+                <div id="supp-t" class="view-title">SUPPORT</div>
+                <div id="supp-st" class="view-subtitle">Contact Development Cluster</div>
+                <div class="card">
+                    <span id="supp_h" class="label">CONTACT EMAIL</span>
+                    <input type="text" class="text-input" style="width: 100%; margin-bottom: 20px;">
+                    <span id="supp_d" class="label">DESCRIPTION</span>
+                    <textarea class="text-input" style="width: 100%; height: 100px; resize: none;"></textarea>
+                </div>
+                <button class="btn" onclick="sendTicket()" id="btn-send">SEND TICKET</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="installer" class="window">
+        <div class="inst-title">GAMELAUNCHER DEPLOYMENT</div>
+        <div id="inst-target" class="inst-target">Target: C:/Program Files/GameLauncher</div>
+        <div id="inst-file-status" class="inst-status">Initializing core engine...</div>
+        <div class="p-bg">
+            <div id="p-bar" class="p-bar"></div>
+        </div>
+        <div id="inst-perc" class="inst-perc">0%</div>
+    </div>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+        const langData = {
+            "EN": {
+                "home": "HOME", "conf": "CONFIG", "leg": "PROTOCOL", "supp": "SUPPORT", "next": "NEXT", "inst": "INITIALIZE", "browse": "BROWSE", "path_t": "INSTALLATION PATH", "agree": "I accept all 26 legal protocols.", "send": "SEND TICKET", "supp_h": "CONTACT EMAIL", "supp_d": "DESCRIPTION",
+                "w_t": "GAMELAUNCHER Setup", "w_d": "High-Performance Engine Deployment Utility",
+                "w_c": "The GameLauncher Deployment Engine has successfully synchronized with your hardware architecture. This setup utility will facilitate the secure extraction of core binary modules, including multi-threaded rendering layers, Vulkan API redundancy shaders, and low-latency network protocols.\n\nTECHNICAL REPORT:\n- Hardware Virtualization: CHECKED\n- GPU Shader Model 6.5: COMPATIBLE\n- AES-256 Decryption Engine: ACTIVE\n- Local Cache Integrity Node: VERIFIED\n- Real-time Memory Scrambler: STANDBY",
+                "clauses": [
+                    "1. AGREEMENT: This EULA is a legal contract between you and GameLauncher.",
+                    "2. LICENSE: We grant you a personal, non-exclusive license to use the software.",
+                    "3. KERNEL ACCESS: The software may initialize Ring-0 modules for integrity.",
+                    "4. DATA COLLECTION: Telemetry is gathered to optimize engine performance.",
+                    "5. ENCRYPTION: Communication is secured via AES-256 decentralized nodes.",
+                    "6. UPDATES: You consent to automatic background delta-patching.",
+                    "7. DRM: Constant server heartbeat is required to verify asset ownership.",
+                    "8. THIRD PARTY: We use Vulkan and PhysX libraries under license.",
+                    "9. ANTI-CHEAT: Real-time process monitoring is enabled during execution.",
+                    "10. MODIFICATION: Attempting to decompile assets results in termination.",
+                    "11. CONDUCT: Harassment in integrated nodes will lead to permanent bans.",
+                    "12. LIABILITY: GameLauncher is not responsible for hardware thermal fatigue.",
+                    "13. GEOLOCATION: Service availability depends on your regional IP node.",
+                    "14. TERMINATION: We reserve the right to revoke access at any time.",
+                    "15. VIRTUAL GOODS: Digital assets have no real-world monetary value.",
+                    "16. PRIVACY: Data is managed under Global Digital Privacy standards.",
+                    "17. HARDWARE: Minimum system requirements must be maintained.",
+                    "18. OVERCLOCKING: System instability due to overclocking is not covered.",
+                    "19. LOGS: Crash reports are sent automatically to the dev cluster.",
+                    "20. STORAGE: Temporary cache files may be created in the local AppData.",
+                    "21. NETWORK: Bandwidth allocation is optimized for low-latency sync.",
+                    "22. MULTI-ACCOUNTING: One license per unique Hardware ID (HWID).",
+                    "23. FEEDBACK: Any feedback submitted becomes the property of the dev team.",
+                    "24. JURISDICTION: Disputes will be settled under international law.",
+                    "25. REVISION: These terms may be updated without prior notification.",
+                    "26. CONSENT: By checking the box below, you agree to all 26 protocols."
+                ]
+            },
+            "PT": {
+                "home": "INÍCIO", "conf": "CONFIG", "leg": "PROTOCOLO", "supp": "SUPORTE", "next": "PRÓXIMO", "inst": "INICIALIZAR", "browse": "BUSCAR", "path_t": "CAMINHO DE INSTALAÇÃO", "agree": "Aceito os 26 protocolos legais.", "send": "ENVIAR", "supp_h": "EMAIL", "supp_d": "DESCRIÇÃO",
+                "w_t": "Configuração GAMELAUNCHER", "w_d": "Utilitário de Implantação de Alta Performance",
+                "w_c": "O mecanismo de implantação sincronizou com sua arquitetura de hardware. Este utilitário facilitará a extração segura de módulos binários.\n\nRELATÓRIO TÉCNICO:\n- Virtualização: CHECADO\n- Shader Model 6.5: COMPATÍVEL\n- Motor AES-256: ATIVO\n- Integridade de Cache: VERIFICADO",
+                "clauses": ["1. ACORDO...", "26. CONSENTIMENTO: Ao marcar abaixo, você concorda."]
+            },
+            "DE": {
+                "home": "START", "conf": "KONFIG", "leg": "PROTOKOLL", "supp": "SUPPORT", "next": "WEITER", "inst": "STARTEN", "browse": "SUCHEN", "path_t": "INSTALLATIONSPFAD", "agree": "Ich akzeptiere alle 26 Protokolle.", "send": "SENDEN", "supp_h": "EMAIL", "supp_d": "BESCHREIBUNG",
+                "w_t": "GAMELAUNCHER Setup", "w_d": "Hochleistungs-Engine-Deployment-Tool",
+                "w_c": "Die Deployment-Engine wurde erfolgreich synchronisiert.",
+                "clauses": ["1. VEREINBARUNG...", "26. ZUSTIMMUNG: Mit dem Häkchen akzeptieren Sie."]
+            },
+            "FR": {
+                "home": "ACCUEIL", "conf": "CONFIG", "leg": "PROTOCOLE", "supp": "SUPPORT", "next": "SUIVANT", "inst": "INSTALLER", "browse": "PARCOURIR", "path_t": "CHEMIN D'INSTALLATION", "agree": "J'accepte les 26 protocoles.", "send": "ENVOYER", "supp_h": "EMAIL", "supp_d": "DESCRIPTION",
+                "w_t": "Configuration GAMELAUNCHER", "w_d": "Utilitaire de Déploiement Haute Performance",
+                "w_c": "Le moteur de déploiement s'est synchronisé.",
+                "clauses": ["1. ACCORD...", "26. CONSENTEMENT: En cochant, vous acceptez."]
+            },
+            "ES": {
+                "home": "INICIO", "conf": "CONFIG", "leg": "PROTOCOLO", "supp": "SOPORTE", "next": "SIGUIENTE", "inst": "INSTALAR", "browse": "BUSCAR", "path_t": "RUTA DE INSTALACIÓN", "agree": "Acepto los 26 protocolos legales.", "send": "ENVIAR", "supp_h": "EMAIL", "supp_d": "DESCRIPCIÓN",
+                "w_t": "Instalación GAMELAUNCHER", "w_d": "Utilidad de Despliegue de Alto Rendimiento",
+                "w_c": "El motor de despliegue se ha sincronizado.",
+                "clauses": ["1. ACUERDO...", "26. CONSENTIMIENTO: Al marcar, acepta."]
+            }
+        };
+
+        let currentLang = "EN";
+        let installPath = "C:/Program Files/GameLauncher";
+
+        function changeLang(val) {
+            currentLang = val;
+            updateUI();
+        }
+
+        function updateUI() {
+            const d = langData[currentLang];
+
+            // Navbar
+            document.getElementById('txt-home').innerText = d.home;
+            document.getElementById('txt-conf').innerText = d.conf;
+            document.getElementById('txt-leg').innerText = d.leg;
+            document.getElementById('txt-supp').innerText = d.supp;
+
+            // Welcome
+            document.getElementById('w_t').innerText = d.w_t;
+            document.getElementById('w_d').innerText = d.w_d;
+            document.getElementById('w_c').innerText = d.w_c;
+            document.getElementById('btn-next1').innerText = d.next;
+
+            // Config
+            document.getElementById('conf-t').innerText = d.conf;
+            document.getElementById('path_t').innerText = d.path_t;
+            document.getElementById('txt-browse').innerText = d.browse;
+            document.getElementById('btn-next2').innerText = d.next;
+
+            // Legal
+            document.getElementById('leg-t').innerText = d.leg;
+            document.getElementById('legal-content').innerText = (d.clauses || []).join('\n\n');
+            document.getElementById('agree-label').innerText = d.agree;
+            document.getElementById('btn-inst').innerText = d.inst;
+
+            // Support
+            document.getElementById('supp-t').innerText = d.supp;
+            document.getElementById('supp_h').innerText = d.supp_h;
+            document.getElementById('supp_d').innerText = d.supp_d;
+            document.getElementById('btn-send').innerText = d.send;
+        }
+
+        function navigate(step) {
+            // Update Active Nav
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('nav-' + step).classList.add('active');
+
+            // Update Active View
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById('view-' + step.toLowerCase()).classList.add('active');
+        }
+
+        function browsePath() {
+            let p = prompt("Enter target directory:", installPath);
+            if (p) {
+                installPath = p;
+                document.getElementById('install-path-input').value = p;
+            }
+        }
+
+        function sendTicket() {
+            alert("Support: Ticket sent to cluster.");
+        }
+
+        function startFinal() {
+            if (document.getElementById('agree-cb').checked) {
+                document.getElementById('main-app').style.display = 'none';
+                runInstaller();
+            } else {
+                alert("System: Agreement required to proceed.");
+            }
+        }
+
+        async function runInstaller() {
+            const modal = document.getElementById('installer');
+            modal.style.display = 'flex';
+            document.getElementById('inst-target').innerText = `Target: ${installPath}`;
+
+            const files = [
+                "vulkan-1.dll", "nvngx_dlss.dll", "bink2w64.dll", "PhysX3_x64.dll", "tbbmalloc.dll",
+                "d3dcompiler_47.dll", "XInput1_4.dll", "OpenAL32.dll", "msvcp140.dll", "vcruntime140_1.dll",
+                "DirectXTex.dll", "Engine_Win64_Shipping.exe", "GameAssets_LOD0.pak", "Global_ShaderCache.bin"
+            ];
+
+            // --- 90 SANİYE HESAPLAMASI ---
+            const totalDuration = 90000; // Toplam 90 saniye (ms)
+            const stepDuration = totalDuration / files.length; // Dosya başına düşen süre
+
+            for (let i = 0; i < files.length; i++) {
+                // Mevcut dosyanın adını yazdır
+                document.getElementById('inst-file-status').innerText = `Deploying: ${files[i]} (${i + 1}/${files.length})`;
+
+                // İlerlemeyi hesapla ve çubuğu güncelle
+                let startPercent = (i / files.length) * 100;
+                let endPercent = ((i + 1) / files.length) * 100;
+
+                // Her dosya yüklenirken barın akıcı dolması için küçük bir iç döngü
+                const subSteps = 20; // Her dosya için 20 görsel adım
+                const subInterval = stepDuration / subSteps;
+
+                for (let j = 0; j <= subSteps; j++) {
+                    let currentPercent = startPercent + ((endPercent - startPercent) * (j / subSteps));
+                    document.getElementById('p-bar').style.width = currentPercent + "%";
+                    document.getElementById('inst-perc').innerText = Math.floor(currentPercent) + "%";
+                    await new Promise(r => setTimeout(r, subInterval));
+                }
+            }
+
+            // Tamamlandığında kısa bir bekleme ve final mesajı
+            document.getElementById('inst-file-status').innerText = "Finalizing deployment...";
+            await new Promise(r => setTimeout(r, 1000));
+
+            modal.style.display = 'none';
+            alert("Fatal Exception\n\nMemory Violation at 0x00007FF7B4D5F862.\n\nProcess terminated.");
+            ipcRenderer.send('hide-me');
+        }
+        // Drag functionality (Masaüstü uygulaması hissi için)
+        function setDraggable(id) {
+            const el = document.getElementById(id);
+            let x = 0, y = 0, x1 = 0, y1 = 0;
+            el.onmousedown = (e) => {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'BUTTON' || e.target.tagName === 'TEXTAREA') return;
+                e.preventDefault();
+                x1 = e.clientX; y1 = e.clientY;
+                document.onmouseup = () => { document.onmouseup = null; document.onmousemove = null; };
+                document.onmousemove = (e) => {
+                    x = x1 - e.clientX; y = y1 - e.clientY;
+                    x1 = e.clientX; y1 = e.clientY;
+                    el.style.top = (el.offsetTop - y) + "px";
+                    el.style.left = (el.offsetLeft - x) + "px";
+                };
+            };
+        }
+
+        updateUI();
+        setDraggable('main-app');
+        setDraggable('installer');
+
+    </script>
+</body>
+
+</html>

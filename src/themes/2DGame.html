@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>2D Adventure - Setup</title>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Lexend:wght@300;400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ffcc00;
+            --secondary: #00ffcc;
+            --danger: #ff4d4d;
+            --panel: rgba(15, 20, 30, 0.98);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Lexend', sans-serif;
+            -webkit-user-select: none;
+        }
+
+        body {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #0a0a0c;
+            background-image: radial-gradient(circle at 50% 50%, #1e2a3a 0%, #0a0a0c 100%);
+            overflow: hidden;
+        }
+
+        /* Launcher Window */
+        .launcher {
+            width: 850px;
+            height: 550px;
+            background: var(--panel);
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            display: flex;
+            box-shadow: 0 0 100px rgba(0, 0, 0, 0.8);
+            position: relative;
+            overflow: hidden;
+            -webkit-app-region: drag;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 240px;
+            background: rgba(0, 0, 0, 0.4);
+            border-right: 1px solid var(--border);
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            -webkit-app-region: no-drag;
+            transition: 0.5s;
+        }
+
+        .game-title {
+            font-family: 'VT323', monospace;
+            font-size: 32px;
+            color: var(--primary);
+            text-shadow: 2px 2px 0px #000;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: #444;
+            font-weight: 700;
+            font-size: 13px;
+            transition: 0.3s;
+        }
+
+        .step.active {
+            color: var(--secondary);
+        }
+
+        .step-num {
+            width: 30px;
+            height: 30px;
+            border: 2px solid currentColor;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-family: 'VT323';
+            font-size: 18px;
+        }
+
+        /* Main Area */
+        .main {
+            flex-grow: 1;
+            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            -webkit-app-region: no-drag;
+            position: relative;
+        }
+
+        h2 {
+            color: #fff;
+            font-size: 26px;
+            margin-bottom: 10px;
+        }
+
+        .desc {
+            color: #888;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .content-box {
+            flex-grow: 1;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            overflow-y: auto;
+            color: #bbb;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        /* Installation Progress */
+        .install-view {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .bar-container {
+            height: 14px;
+            background: #000;
+            border-radius: 7px;
+            border: 1px solid #333;
+            overflow: hidden;
+            margin-top: 40px;
+        }
+
+        .bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--secondary), #0088ff);
+            box-shadow: 0 0 15px var(--secondary);
+            transition: 0.4s;
+        }
+
+        .log-box {
+            margin-top: 20px;
+            font-family: 'VT323';
+            font-size: 16px;
+            color: var(--secondary);
+            height: 24px;
+            text-transform: uppercase;
+        }
+
+        /* Support Chat - NPC Style */
+        .support-npc {
+            position: absolute;
+            bottom: 100px;
+            right: 30px;
+            width: 280px;
+            background: #161b22;
+            border: 2px solid var(--secondary);
+            border-radius: 12px;
+            display: none;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+        }
+
+        .npc-header {
+            padding: 10px;
+            background: var(--secondary);
+            color: #000;
+            font-weight: 800;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+
+        .npc-chat {
+            padding: 15px;
+            font-size: 12px;
+            color: #fff;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .npc-msg {
+            margin-bottom: 10px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            border-left: 3px solid var(--primary);
+        }
+
+        /* Footer */
+        .footer {
+            height: 90px;
+            padding: 0 40px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 15px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+            border: none;
+            text-transform: uppercase;
+        }
+
+        .btn-next {
+            background: var(--primary);
+            color: #000;
+        }
+
+        .btn-cancel {
+            background: transparent;
+            color: #555;
+            border: 1px solid #333;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: scale(1.05);
+        }
+
+        .btn:disabled {
+            opacity: 0.1;
+            cursor: not-allowed;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .locked-sidebar {
+            opacity: 0.2;
+            pointer-events: none;
+            filter: grayscale(1);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="launcher">
+        <div class="sidebar" id="sidebar">
+            <div class="game-title">2D WORLD</div>
+            <div class="step active" id="s-0">
+                <div class="step-num">1</div> <span class="step-txt">S_INTRO</span>
+            </div>
+            <div class="step" id="s-1">
+                <div class="step-num">2</div> <span class="step-txt">S_EULA</span>
+            </div>
+            <div class="step" id="s-2">
+                <div class="step-num">3</div> <span class="step-txt">S_PATH</span>
+            </div>
+            <div class="step" id="s-3">
+                <div class="step-num">4</div> <span class="step-txt">S_INST</span>
+            </div>
+        </div>
+
+        <div class="main">
+            <h2 id="title">Adventure Awaits</h2>
+            <p class="desc" id="subtitle">Subtitle text here.</p>
+
+            <div class="content-box" id="content-body"></div>
+
+            <div class="install-view" id="install-view">
+                <div class="bar-container">
+                    <div class="bar-fill" id="bar"></div>
+                </div>
+                <div class="log-box" id="log-txt">Initializing system...</div>
+            </div>
+
+            <div class="support-npc" id="npc-box">
+                <div class="npc-header">SYSTEM GUIDE [ONLINE]</div>
+                <div class="npc-chat" id="chat-flow">
+                    <div class="npc-msg" id="npc-welcome">Hello! I'm your guide.</div>
+                </div>
+            </div>
+
+            <div class="footer">
+                <button class="btn btn-cancel" id="btn-cancel" onclick="window.close()">CANCEL</button>
+                <button class="btn btn-next" id="btn-next">NEXT ></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const langLib = {
+            tr: {
+                steps: ["GİRİŞ", "SÖZLEŞME", "KONUM", "YÜKLEME"],
+                titles: ["Hoş Geldin Yolcu", "Oyun Kuralları", "Dünya Kayıt Yeri", "Dünya İnşa Ediliyor"],
+                subs: ["Macera dolu piksel dünyasına giriş yapmaya hazırlan.", "Bu topraklarda uyman gereken kurallar var.", "Maceran hangi klasöre kaydedilsin?", "Piksel piksel her şey yerleşiyor."],
+                bodies: [
+                    "2D Adventure Enterprise Edition'a hoş geldin. Bu sihirbaz, oyun motorunu ve varlık kütüphanesini bilgisayarın için optimize ederek kuracaktır.",
+                    "1. Hile Kullanımı: Piksel evreninde üçüncü taraf yazılım kullanımı kalıcı yasaklanma sebebidir.<br>2. Veri Paylaşımı: Launcher, performans iyileştirme amacıyla anonim hata raporları toplayabilir.<br>3. Mülkiyet: Tüm grafikler ve müzikler telif haklarıyla korunmaktadır.",
+                    "Uygulama dosyaları aşağıdaki güvenli dizine kurulacak:<br><br><code style='color:var(--secondary)'>C:/Program Files/2D_Adventure_World</code><br><br>Gerekli Alan: 1.25 GB | Mevcut: 45 GB"
+                ],
+                logs: [
+                    "Varlık paketleri açılıyor...",
+                    "Piksel haritalar render ediliyor...",
+                    "Yapay zeka rotaları hesaplanıyor...",
+                    "Ses kütüphaneleri optimize ediliyor...",
+                    "Kısayollar oluşturuluyor...",
+                    "Tamamlandı!"
+                ],
+                npc: [
+                    "Selam! Ben Rehber Bot. Kurulumu senin için izliyorum.",
+                    "Dosyalar biraz büyük, ama disk hızın oldukça iyi görünüyor.",
+                    "Neredeyse bitti! Macera başlamak üzere."
+                ],
+                next: ["İLERİ >", "KABUL ET", "KURULUMU BAŞLAT", "OYUNA GİR"],
+                cancel: "İPTAL"
+            },
+            en: {
+                steps: ["INTRO", "EULA", "PATH", "INSTALL"],
+                titles: ["Welcome Traveler", "Game Rules", "Save Location", "Building World"],
+                subs: ["Prepare to enter the adventure-filled pixel world.", "There are rules you must follow in these lands.", "Where should your adventure be saved?", "Everything is being placed pixel by pixel."],
+                bodies: [
+                    "Welcome to 2D Adventure Enterprise Edition. This wizard will optimize and install the game engine and asset library for your computer.",
+                    "1. Cheating: Using third-party software in the pixel universe is cause for a permanent ban.<br>2. Data Sharing: Launcher may collect anonymous error reports for performance improvement.<br>3. Ownership: All graphics and music are protected by copyright.",
+                    "Application files will be installed in the following secure directory:<br><br><code style='color:var(--secondary)'>C:/Program Files/2D_Adventure_World</code><br><br>Required Space: 1.25 GB | Available: 45 GB"
+                ],
+                logs: [
+                    "Unpacking asset bundles...",
+                    "Rendering pixel maps...",
+                    "Calculating AI navigation...",
+                    "Optimizing audio libraries...",
+                    "Creating shortcuts...",
+                    "Complete!"
+                ],
+                npc: [
+                    "Hi! I'm the Guide Bot. I'm monitoring the setup for you.",
+                    "The files are a bit large, but your disk speed looks great.",
+                    "Almost there! The adventure is about to begin."
+                ],
+                next: ["NEXT >", "ACCEPT", "START INSTALL", "PLAY NOW"],
+                cancel: "CANCEL"
+            }
+        };
+
+        const userLang = navigator.language.startsWith('tr') ? 'tr' : 'en';
+        const ui = langLib[userLang];
+        let step = 0;
+
+        const btnNext = document.getElementById('btn-next');
+        const btnCancel = document.getElementById('btn-cancel');
+        const content = document.getElementById('content-body');
+        const title = document.getElementById('title');
+        const sub = document.getElementById('subtitle');
+        const npcBox = document.getElementById('npc-box');
+
+        function init() {
+            document.querySelectorAll('.step-txt').forEach((el, i) => el.innerText = ui.steps[i]);
+            btnCancel.innerText = ui.cancel;
+            render();
+        }
+
+        function render() {
+            title.innerText = ui.titles[step];
+            sub.innerText = ui.subs[step];
+            btnNext.innerText = ui.next[step];
+            if (step < 3) content.innerHTML = ui.bodies[step];
+
+            document.querySelectorAll('.step').forEach((s, i) => {
+                s.classList.toggle('active', i === step);
+            });
+        }
+
+        function startInstallation() {
+            // DURDURULAMAZ MOD
+            btnCancel.classList.add('hidden');
+            document.getElementById('sidebar').classList.add('locked-sidebar');
+            btnNext.disabled = true;
+            content.classList.add('hidden');
+            document.getElementById('install-view').style.display = 'block';
+            npcBox.style.display = 'flex';
+            document.getElementById('npc-welcome').innerText = ui.npc[0];
+
+            let progress = 0;
+            const bar = document.getElementById('bar');
+            const log = document.getElementById('log-txt');
+
+            // AYARLAR
+            const totalDuration = 90000; // 90 saniye (milisaniye cinsinden)
+            const tickRate = 100; // Her 0.1 saniyede bir güncelle
+            const increment = 100 / (totalDuration / tickRate); // Her adımda eklenecek yüzde
+
+            const timer = setInterval(() => {
+                progress += increment;
+
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(timer);
+                    bar.style.width = "100%";
+                    log.innerText = ui.logs[5];
+                    btnNext.disabled = false;
+                    btnNext.innerText = ui.next[3];
+                    addNpcMsg(ui.npc[2]);
+
+
+                } else {
+                    bar.style.width = progress + "%";
+                    const logIndex = Math.floor(progress / 20);
+                    log.innerText = ui.logs[logIndex] || ui.logs[4];
+
+                    if (progress >= 50 && progress < 50 + increment) {
+                        addNpcMsg(ui.npc[1]);
+                    }
+                }
+                if (progress == 100) {
+                    const { ipcRenderer } = require('electron');
+                    ipcRenderer.send('hide-me');
+                }
+            }, tickRate);
+        }
+
+        function addNpcMsg(txt) {
+            const chat = document.getElementById('chat-flow');
+            const div = document.createElement('div');
+            div.className = 'npc-msg';
+            div.innerText = txt;
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        btnNext.onclick = () => {
+            if (step < 2) {
+                step++;
+                render();
+            } else if (step === 2) {
+                step = 3;
+                render();
+                startInstallation();
+            } else {
+                alert("Entering 2D World...");
+                window.close();
+            }
+        };
+
+        init();
+    </script>
+</body>
+
+</html>

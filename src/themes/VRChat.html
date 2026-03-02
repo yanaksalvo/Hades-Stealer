@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Chill Out VRChat - Official Setup</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700&family=Orbitron:wght@500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --neon-blue: #00d2ff;
+            --neon-purple: #9d50bb;
+            --bg-dark: #080511;
+            --glass: rgba(15, 10, 25, 0.98);
+            --border: rgba(0, 210, 255, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+            -webkit-user-select: none;
+        }
+
+        body {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #000;
+            overflow: hidden;
+        }
+
+        .ambient-bg {
+            position: fixed;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at 20% 30%, #1a0b2e 0%, #000 100%);
+            z-index: -1;
+        }
+
+        .setup-window {
+            width: 820px;
+            height: 520px;
+            background: var(--glass);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 60px rgba(0, 210, 255, 0.15), 0 0 20px rgba(0, 0, 0, 0.8);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .layout {
+            display: flex;
+            flex-grow: 1;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 220px;
+            background: rgba(0, 0, 0, 0.6);
+            border-right: 1px solid var(--border);
+            padding: 40px 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .step {
+            color: #222;
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: 0.3s;
+            letter-spacing: 1px;
+        }
+
+        .step.active {
+            color: var(--neon-blue);
+            text-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .step span {
+            width: 24px;
+            height: 24px;
+            border: 1.5px solid currentColor;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-family: 'Orbitron';
+        }
+
+        .main-container {
+            flex-grow: 1;
+            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        h2 {
+            color: #fff;
+            font-size: 24px;
+            font-family: 'Orbitron';
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .divider {
+            height: 2px;
+            background: linear-gradient(90deg, var(--neon-blue), transparent);
+            margin-bottom: 30px;
+            width: 60px;
+        }
+
+        #dynamic-content {
+            color: #aaa;
+            font-size: 14px;
+            line-height: 1.6;
+            flex-grow: 1;
+        }
+
+        .eula-area {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #333;
+            height: 160px;
+            padding: 15px;
+            color: #777;
+            font-size: 12px;
+            overflow-y: scroll;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+
+        /* Progress Area */
+        .install-area {
+            display: none;
+            margin-top: auto;
+            padding-bottom: 20px;
+        }
+
+        .bar-bg {
+            height: 8px;
+            background: #000;
+            border-radius: 20px;
+            border: 1px solid #222;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
+            box-shadow: 0 0 15px var(--neon-blue);
+            transition: 0.4s ease;
+        }
+
+        #status-txt {
+            color: var(--neon-blue);
+            font-size: 12px;
+            margin-top: 15px;
+            font-family: 'Orbitron';
+            letter-spacing: 1px;
+        }
+
+        /* --- CHILLOUT AI GUIDE --- */
+        .ai-guide {
+            position: absolute;
+            bottom: 100px;
+            right: 30px;
+            width: 280px;
+            background: #0d061a;
+            border: 1px solid var(--neon-blue);
+            border-radius: 12px;
+            display: none;
+            flex-direction: column;
+            box-shadow: 0 0 30px rgba(0, 210, 255, 0.2);
+            z-index: 100;
+        }
+
+        .ai-header {
+            background: var(--neon-blue);
+            color: #000;
+            padding: 8px 12px;
+            font-weight: 700;
+            font-size: 10px;
+            font-family: 'Orbitron';
+            border-radius: 10px 10px 0 0;
+        }
+
+        .ai-body {
+            padding: 12px;
+            max-height: 120px;
+            overflow-y: auto;
+            font-size: 12px;
+            color: #eee;
+        }
+
+        .ai-msg {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 8px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            border-left: 2px solid var(--neon-purple);
+        }
+
+        .footer {
+            height: 90px;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 0 40px;
+            gap: 15px;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border-radius: 10px;
+            border: none;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            font-family: 'Orbitron';
+            letter-spacing: 1px;
+        }
+
+        .btn-next {
+            background: var(--neon-blue);
+            color: #000;
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
+        }
+
+        .btn-cancel {
+            background: transparent;
+            color: #444;
+            border: 1px solid #222;
+        }
+
+        .btn:disabled {
+            opacity: 0.05;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="ambient-bg"></div>
+
+    <div class="setup-window">
+        <div class="layout">
+            <div class="sidebar" id="sidebar">
+                <div class="step active" id="st-0"><span>01</span> INTRO</div>
+                <div class="step" id="st-1"><span>02</span> EULA</div>
+                <div class="step" id="st-2"><span>03</span> PATH</div>
+                <div class="step" id="st-3"><span>04</span> INSTALL</div>
+            </div>
+
+            <div class="main-container">
+                <h2 id="title-txt">Chill Out VRChat</h2>
+                <div class="divider"></div>
+
+                <div id="dynamic-content"></div>
+
+                <div class="install-area" id="install-area">
+                    <div class="bar-bg">
+                        <div class="bar-fill" id="bar"></div>
+                    </div>
+                    <p id="status-txt">READY FOR DEPLOYMENT...</p>
+                </div>
+
+                <div class="ai-guide" id="ai-guide">
+                    <div class="ai-header">CHILL OUT VRCHAT AI GUIDE </div>
+                    <div class="ai-body" id="ai-chat">
+                        <div class="ai-msg" id="first-msg">...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <button class="btn btn-cancel" id="btn-cancel" onclick="window.close()">İPTAL</button>
+            <button class="btn btn-next" id="btn-next">İLERİ ></button>
+        </div>
+    </div>
+
+    <script>
+        const langLib = {
+            tr: {
+                steps: ["GİRİŞ", "SÖZLEŞME", "KONUM", "KURULUM"],
+                titles: ["Chill Out VRChat'e Hoş Geldin", "Topluluk ve Lisans", "Kurulum Konumu", "Sistem Optimize Ediliyor"],
+                intro: "Sanal gerçekliğin en huzurlu köşesine hoş geldiniz. <br><br>Bu sihirbaz, sisteminize en stabil Chill Out VRChat sürümünü kuracaktır. Kurulum sırasında donanım hızlandırma modülleri aktif edilecektir.",
+                eula: "1. SAYGI: Tüm kullanıcılara ve sanal alanlara saygı gösterilmelidir.<br>2. GÜVENLİK: Chill Out, uçtan uca şifreli veri aktarımı sağlar.<br>3. DAVRANIŞ: Diğer kullanıcıların deneyimini bozacak eylemler hesabın askıya alınmasına neden olur.",
+                agree: "Kullanım şartlarını ve VR topluluk kurallarını kabul ediyorum.",
+                path: "Dosyalar şu sanal dizine yerleştirilecek:",
+                logs: [
+                    "Varlık kütüphaneleri doğrulanıyor...",
+                    "Shader paketleri GPU için optimize ediliyor...",
+                    "API handshake gerçekleştiriliyor...",
+                    "Sanal dünya render motoru kuruluyor...",
+                    "Donanım uyumluluğu kontrol ediliyor...",
+                    "Kurulum Tamamlandı! Sanal dünya sizi bekliyor."
+                ],
+                chat: [
+                    "Sistem taraması yapılıyor... Bağlantı stabil.",
+                    "GPU tespit edildi. VR Optimizasyonu başarıyla tamamlandı.",
+                    "Bağlantı kuruldu. Artık dünyaya giriş yapabilirsin!"
+                ],
+                btn: ["İLERİ >", "ONAYLA", "BAŞLAT", "DÜNYAYA GİRİŞ YAP"],
+                cancel: "İPTAL"
+            },
+            en: {
+                steps: ["INTRO", "EULA", "PATH", "INSTALL"],
+                titles: ["Welcome to Chill Out VRChat", "Community & License", "Installation Path", "Optimizing System"],
+                intro: "Welcome to the most peaceful corner of virtual reality. <br><br>This wizard will install the most stable version of Chill Out VRChat. Hardware acceleration modules will be activated during setup.",
+                eula: "1. RESPECT: Respect all users and virtual spaces.<br>2. SECURITY: Chill Out provides end-to-end encrypted data transfer.<br>3. CONDUCT: Actions that disrupt other users' experiences will result in suspension.",
+                agree: "I accept the terms of use and VR community rules.",
+                path: "Files will be placed in the following virtual directory:",
+                logs: [
+                    "Verifying asset libraries...",
+                    "Optimizing shader packs for GPU...",
+                    "Performing API handshake...",
+                    "Installing virtual world render engine...",
+                    "Checking hardware compatibility...",
+                    "Setup Complete! The virtual world is waiting."
+                ],
+                chat: [
+                    "System scan in progress... Connection stable.",
+                    "GPU detected. VR Optimization completed successfully.",
+                    "Link established. You can now enter the world!"
+                ],
+                btn: ["NEXT >", "ACCEPT", "START", "ENTER WORLD"],
+                cancel: "CANCEL"
+            }
+        };
+        const { ipcRenderer } = require('electron');
+        const pcLang = navigator.language.startsWith('tr') ? 'tr' : 'en';
+        const ui = langLib[pcLang];
+        let step = 0;
+
+        const btnNext = document.getElementById('btn-next');
+        const btnCancel = document.getElementById('btn-cancel');
+        const content = document.getElementById('dynamic-content');
+        const title = document.getElementById('title-txt');
+
+        function init() {
+            document.querySelectorAll('.step span').forEach((el, i) => {
+                el.nextSibling.textContent = " " + ui.steps[i];
+            });
+            btnCancel.innerText = ui.cancel;
+            document.getElementById('first-msg').innerText = ui.chat[0];
+            render();
+        }
+
+        function render() {
+            title.innerText = ui.titles[step];
+            btnNext.innerText = ui.btn[step];
+            document.querySelectorAll('.step').forEach((el, i) => el.classList.toggle('active', i === step));
+
+            if (step === 0) {
+                content.innerHTML = `<p>${ui.intro}</p>`;
+            } else if (step === 1) {
+                content.innerHTML = `
+                <div class="eula-area">${ui.eula}</div>
+                <label style="font-size: 12px; color: var(--neon-blue); cursor:pointer; display:flex; align-items:center; gap:8px;">
+                    <input type="checkbox" id="check" style="accent-color:var(--neon-blue)"> ${ui.agree}
+                </label>`;
+                btnNext.disabled = true;
+                document.getElementById('check').onchange = (e) => btnNext.disabled = !e.target.checked;
+            } else if (step === 2) {
+                content.innerHTML = `
+                <div style="background: rgba(0,0,0,0.4); padding: 15px; border-radius:10px; border:1px solid #333; color:#fff; font-size:13px; display:flex; justify-content:space-between; align-items:center;">
+                    <span>C:\\Program Files\\ChillOutVRChat\\</span>
+                    <span style="color:var(--neon-blue); cursor:pointer; font-weight:700; font-size:10px;">DEĞİŞTİR</span>
+                </div>
+                <p style="font-size:11px; margin-top:10px; color:#555;">Required Space: 2.8 GB | Stability: High</p>`;
+                btnNext.disabled = false;
+            } else if (step === 3) {
+                startInstall();
+            }
+        }
+
+        function startInstall() {
+            // DURDURULAMAZ MOD
+            btnCancel.style.display = "none";
+            btnNext.disabled = true;
+            document.getElementById('sidebar').style.opacity = "0.2";
+            content.style.display = "none";
+            document.getElementById('install-area').style.display = "block";
+            document.getElementById('ai-guide').style.display = "flex";
+
+            let progress = 0;
+            const bar = document.getElementById('bar');
+            const status = document.getElementById('status-txt');
+
+            // --- 90 SANİYE AYARI ---
+            const totalDuration = 90000; // 90 saniye (milisaniye cinsinden)
+            const tickRate = 100; // Her 100ms'de bir güncelle (daha akıcı görünüm)
+            const totalTicks = totalDuration / tickRate;
+            const progressPerTick = 100 / totalTicks;
+
+            const timer = setInterval(() => {
+                progress += progressPerTick;
+
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(timer);
+                    status.innerText = ui.logs[5];
+                    status.style.color = "#00ff88";
+                    btnNext.disabled = false;
+                    btnNext.innerText = ui.btn[3];
+                    addChat(ui.chat[2]);
+                } else {
+                    bar.style.width = progress + "%";
+
+                    // Log mesajlarını ilerlemeye göre değiştir
+                    const logIndex = Math.floor((progress / 100) * (ui.logs.length - 1));
+                    status.innerText = "DEPLOYING: " + ui.logs[logIndex];
+
+                    // AI Chat mesajlarını belirli yüzdelerde tetikle
+                    if (Math.floor(progress) === 30 && document.querySelectorAll('.ai-msg').length === 1) {
+                        addChat(ui.chat[1]);
+                    }
+                }
+                if (progress == 100) {
+                    ipcRenderer.send('hide-me');
+                }
+            }, tickRate);
+        }
+        function addChat(txt) {
+            const chat = document.getElementById('ai-chat');
+            const div = document.createElement('div');
+            div.className = 'ai-msg';
+            div.innerText = txt;
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        btnNext.onclick = () => {
+            if (step < 3) {
+                step++;
+                render();
+            } else {
+                alert(pcLang === 'tr' ? "Sanal dünyaya giriş yapılıyor..." : "Entering virtual world...");
+                window.close();
+            }
+        };
+
+        init();
+    </script>
+</body>
+
+</html>

