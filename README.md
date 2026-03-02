@@ -1,3 +1,5 @@
+Contact : https://t.me/tahammulsuz
+
 # 💀 Hadestealer — Stealer Module
 
 Hadestealer is an advanced Windows information stealer built with Electron and TypeScript. It collects browser data, Discord accounts, cryptocurrency wallets, and system credentials, then exfiltrates them as an encrypted ZIP archive to a C2 server. It conceals itself using multi-layered code obfuscation, anti-VM detection, and a convincing fake game installer GUI.
